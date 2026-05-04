@@ -21,24 +21,6 @@ This system consists of **3 smart contracts**:
 
 ---
 
-## ✨ Custom Features (Special Requirements)
-
-Three special rules were implemented as per assignment requirements:
-
-### Rule 1 — Best-Effort Payout
-> `withdrawAtMaturity` **never reverts** due to insufficient vault funds.
-> - ✅ 100% of principal is **always** returned to the user.
-> - ✅ Interest is paid **up to whatever is available** in the vault.
-> - 📡 Event `PartialInterestPaid` is emitted when vault cannot cover full interest.
-
-### Rule 2 — Auto-Renew Fix APR
-> When `autoRenewDeposit` is called, the **new deposit uses the current market APR** of the plan, not the original snapshot — reflecting real market rate changes made by Admin.
-
-### Rule 3 — Auto-Renew Max Deposit Guard
-> `autoRenewDeposit` **reverts with `AboveMaxDeposit`** if the compounded new principal (old principal + interest) exceeds the plan's `maxDeposit` limit.
-
----
-
 ## 🗂️ Project Structure
 
 ```
@@ -143,5 +125,4 @@ User ──(USDC)──► SavingCore      (holds principal)
 - **Hardhat** `^2.22.0`
 - **OpenZeppelin Contracts** `^5.6.1` (ERC721, ERC20, SafeERC20, Ownable, Pausable)
 - **Ethers.js** `v6`
-- **Mocha + Chai** (via `@nomicfoundation/hardhat-toolbox`)
 - **solidity-coverage** for test coverage reporting
