@@ -162,7 +162,7 @@ contract SavingCore is ERC721, Ownable, Pausable {
         uint256 newPlanId
     );
 
-    // @Teacher-Rule Best-Effort Payout: emitted when Vault cannot pay full interest
+    // Best-Effort Payout: emitted when Vault cannot pay full interest
     event PartialInterestPaid(
         uint256 indexed depositId,
         uint256 expectedInterest,
@@ -365,7 +365,7 @@ contract SavingCore is ERC721, Ownable, Pausable {
 
     /**
      * @notice Withdraw principal + interest after the deposit has matured.
-     * @dev Teacher-Rule Best-Effort Payout:
+     * @dev Best-Effort Payout:
      *      Principal is ALWAYS returned to the user.
      *      Interest is paid best-effort: if the Vault has insufficient funds,
      *      only the available portion is paid and PartialInterestPaid is emitted.
@@ -385,10 +385,10 @@ contract SavingCore is ERC721, Ownable, Pausable {
         uint256 interest = (dep.principal * dep.aprBpsAtOpen * tenorSeconds)
             / (SECONDS_PER_YEAR * BPS_DENOMINATOR);
 
-        // @Teacher-Rule Best-Effort: principal is ALWAYS returned first
+        // Best-Effort: principal is ALWAYS returned first
         token.safeTransfer(msg.sender, dep.principal);
 
-        // @Teacher-Rule Best-Effort: interest paid from vault (partial if insufficient)
+        // Best-Effort: interest paid from vault (partial if insufficient)
         uint256 actualPaid = 0;
         if (interest > 0) {
             actualPaid = vaultManager.requestInterest(msg.sender, interest);
@@ -517,9 +517,9 @@ contract SavingCore is ERC721, Ownable, Pausable {
      * @notice Auto-renew a deposit after the grace period expires.
      * @dev Rules (updated per teacher requirements):
      *  - Same tenor as the original deposit.
-     *  - Teacher-Rule Fix APR: uses CURRENT plan APR & penalty (not original snapshot)
+     *  - Fix APR: uses CURRENT plan APR & penalty (not original snapshot)
      *    to reflect market changes.
-     *  - Teacher-Rule Max Deposit: reverts if newPrincipal > plan.maxDeposit.
+     *  - Max Deposit Guard: reverts if newPrincipal > plan.maxDeposit.
      *  - New principal = old principal + interest.
      *  - Can only be triggered after maturityAt + GRACE_PERIOD.
      * @param depositId ID of the matured deposit.
@@ -536,7 +536,7 @@ contract SavingCore is ERC721, Ownable, Pausable {
 
         address depositOwner = ownerOf(depositId);
 
-        // @Teacher-Rule Fix APR: load current plan rates for the new deposit
+        // Fix APR: load current plan rates for the new deposit
         SavingPlan storage plan = plans[dep.planId];
 
         // ── Calculate interest on old deposit (using OLD snapshot APR) ─────
@@ -546,7 +546,7 @@ contract SavingCore is ERC721, Ownable, Pausable {
 
         uint256 newPrincipal = dep.principal + interest;
 
-        // @Teacher-Rule Max Deposit: prevent compounding past plan limit
+        // Max Deposit Guard: prevent compounding past plan limit
         if (plan.maxDeposit > 0 && newPrincipal > plan.maxDeposit) {
             revert AboveMaxDeposit(newPrincipal, plan.maxDeposit);
         }
@@ -565,7 +565,7 @@ contract SavingCore is ERC721, Ownable, Pausable {
 
         uint256 newMaturityAt = block.timestamp + dep.tenorDays * 1 days;
 
-        // @Teacher-Rule Fix APR: snapshot CURRENT plan APR & penalty (not original)
+        // Fix APR: snapshot CURRENT plan APR & penalty (not original)
         deposits[newDepositId] = Deposit({
             planId: dep.planId,
             principal: newPrincipal,

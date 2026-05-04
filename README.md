@@ -21,7 +21,7 @@ This system consists of **3 smart contracts**:
 
 ---
 
-## 🎓 Teacher-Rules (Custom Requirements)
+## ✨ Custom Features (Special Requirements)
 
 Three special rules were implemented as per assignment requirements:
 
@@ -102,10 +102,10 @@ The `scripts/demo.js` walks through **6 complete scenarios** with step-by-step t
 |---|---|---|
 | 1 | Deposit → wait for maturity → withdraw (Gốc + Lãi) | `openDeposit` → `withdrawAtMaturity` |
 | 2 | Deposit → early withdrawal (5% penalty, 0 interest) | `openDeposit` → `earlyWithdraw` |
-| 3 | **Teacher-Rule 1**: Vault runs dry → Best-Effort Payout | `withdrawAtMaturity` + `PartialInterestPaid` event |
+| 3 | **Best-Effort Payout**: Vault runs dry → still succeeds | `withdrawAtMaturity` + `PartialInterestPaid` event |
 | 4 | Manual renewal — compound interest into new principal | `openDeposit` → `renewDeposit` |
-| 5 | **Teacher-Rule 2**: Auto-renew applies current market APR | `autoRenewDeposit` (new APR, not snapshot) |
-| 6 | **Teacher-Rule 3**: Auto-renew blocked if exceeds maxDeposit | `autoRenewDeposit` → revert `AboveMaxDeposit` |
+| 5 | **Auto-Renew Fix APR**: applies current market APR | `autoRenewDeposit` (new APR, not snapshot) |
+| 6 | **Max Deposit Guard**: auto-renew blocked if exceeds limit | `autoRenewDeposit` → revert `AboveMaxDeposit` |
 
 ---
 

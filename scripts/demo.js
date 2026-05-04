@@ -154,9 +154,9 @@ async function main() {
   console.log(`   📌 Lãi suất = 0 USDC (vì rút sớm, chưa đến hạn)`);
 
   // ══════════════════════════════════════
-  //  KỊCH BẢN 3: TEACHER-RULE 1 - BEST-EFFORT PAYOUT
+  //  KỊCH BẢN 3: BEST-EFFORT PAYOUT
   // ══════════════════════════════════════
-  separator("KỊCH BẢN 3: TEACHER-RULE 1 - BEST-EFFORT PAYOUT (Két cạn tiền)");
+  separator("KỊCH BẢN 3: BEST-EFFORT PAYOUT (Két cạn tiền)");
   console.log("   📋 Vấn đề cũ: Nếu Vault thiếu tiền lãi → giao dịch REVERT → giam tiền gốc!");
   console.log("   📋 Giải pháp: withdrawAtMaturity LUÔN trả đủ gốc + trả lãi theo khả năng\n");
 
@@ -234,9 +234,9 @@ async function main() {
   console.log(`   📄 Sổ mới #5 → Gốc: ${formatUSDC(newDep.principal)} USDC | APR: ${newDep.aprBpsAtOpen / 100n}%`);
 
   // ══════════════════════════════════════
-  //  KỊCH BẢN 5: TEACHER-RULE 2 - AUTO-RENEW + FIX APR
+  //  KỊCH BẢN 5: AUTO-RENEW + CẬP NHẬT LÃI SUẤT THị TRƯỜNG
   // ══════════════════════════════════════
-  separator("KỊCH BẢN 5: TEACHER-RULE 2 - AUTO-RENEW + FIX APR (APR Thị Trường)");
+  separator("KỊCH BẢN 5: AUTO-RENEW + CẬP NHẬT LÃI SUẤT THị TRƯỜNG");
   console.log("   📋 Vấn đề cũ: Auto-renew dùng APR cũ (snapshot) → không phản ánh thị trường");
   console.log("   📋 Giải pháp: autoRenewDeposit lấy APR HIỆN TẠI của Gói, không dùng snapshot\n");
 
@@ -265,9 +265,9 @@ async function main() {
   console.log(`   📌 APR áp dụng cho Sổ mới: ${newDep2.aprBpsAtOpen / 100n}% (APR HIỆN TẠI, không phải ${apr / 100}% cũ!)`);
 
   // ══════════════════════════════════════
-  //  KỊCH BẢN 6: TEACHER-RULE 3 - MAX DEPOSIT GUARD
+  //  KỊCH BẢN 6: BẢO VỆ GIỚI HẠN Gửa TỐI ĐA (MAX DEPOSIT GUARD)
   // ══════════════════════════════════════
-  separator("KỊCH BẢN 6: TEACHER-RULE 3 - MAX DEPOSIT GUARD (Chặn Gộp Lãi Quá Hạn)");
+  separator("KỊCH BẢN 6: BẢO VỆ GIỚI HẠN Gửa TỐI ĐA (Max Deposit Guard)");
   console.log("   📋 Vấn đề: Sau khi gộp lãi, gốc mới có thể vượt maxDeposit → cần chặn");
   console.log("   📋 Giải pháp: autoRenewDeposit revert với AboveMaxDeposit nếu vượt ngưỡng\n");
 
@@ -300,10 +300,10 @@ async function main() {
   separator("🎉 TỔNG KẾT DEMO");
   console.log("  Kịch bản 1: openDeposit → withdrawAtMaturity          ✅ Gốc + Lãi đầy đủ");
   console.log("  Kịch bản 2: openDeposit → earlyWithdraw               ✅ Phạt 5%, không lãi");
-  console.log("  Kịch bản 3: [Teacher-Rule 1] Best-Effort Payout        ✅ Két cạn → vẫn rút được");
-  console.log("  Kịch bản 4: openDeposit → renewDeposit (thủ công)     ✅ Gốc mới = Gốc + Lãi");
-  console.log("  Kịch bản 5: [Teacher-Rule 2] autoRenewDeposit Fix APR  ✅ APR thị trường hiện tại");
-  console.log("  Kịch bản 6: [Teacher-Rule 3] autoRenewDeposit Guard    ✅ Revert nếu vượt maxDeposit\n");
+  console.log("  Kịch bản 3: Best-Effort Payout                        ✅ Két cạn → vẫn rút được");
+  console.log("  Kịch bản 4: openDeposit → renewDeposit (thủ công)      ✅ Gốc mới = Gốc + Lãi");
+  console.log("  Kịch bản 5: Auto-Renew cập nhật lãi suất thị trường  ✅ APR hiện tại, không dùng snapshot");
+  console.log("  Kịch bản 6: Bảo vệ giới hạn gửa tối đa               ✅ Revert nếu vượt maxDeposit\n");
 
   rl.close();
 }

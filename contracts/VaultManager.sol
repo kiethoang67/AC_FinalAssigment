@@ -156,7 +156,7 @@ contract VaultManager is Ownable, Pausable {
     /**
      * @notice Transfer interest from the vault to a user (best-effort).
      * @dev Only callable by the linked SavingCore contract.
-     *      Teacher-Rule Best-Effort Payout: pays min(amount, vaultBalance)
+     *      Best-Effort Payout: pays min(amount, vaultBalance)
      *      instead of reverting when the vault is short. Returns actual paid.
      * @param to     Recipient of the interest.
      * @param amount Interest amount requested.
@@ -171,7 +171,7 @@ contract VaultManager is Ownable, Pausable {
 
         uint256 balance = token.balanceOf(address(this));
 
-        // @Teacher-Rule Best-Effort: pay whatever is available, never revert
+        // Best-Effort: pay whatever is available, never revert
         actualPaid = amount > balance ? balance : amount;
 
         if (actualPaid > 0) {

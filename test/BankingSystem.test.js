@@ -147,7 +147,7 @@ describe("BankingSystem", function () {
     });
   });
 
-  describe("Teacher-Rule 1: Best-Effort Payout (Liquidity Trap)", function () {
+  describe("Best-Effort Payout (Liquidity Trap)", function () {
     it("Should return full principal and partial interest when vault is low", async function () {
       const { token, savingCore, vaultManager, admin, user1, parseUSDC } = await loadFixture(deployBankingSystemFixture);
 
@@ -186,7 +186,7 @@ describe("BankingSystem", function () {
     });
   });
 
-  describe("Teacher-Rule 2 & 3: Auto-Renew", function () {
+  describe("Auto-Renew", function () {
     it("Should revert with AboveMaxDeposit if compounding interest exceeds maxDeposit", async function () {
       const { token, savingCore, admin, user1, parseUSDC } = await loadFixture(deployBankingSystemFixture);
 
@@ -240,7 +240,7 @@ describe("BankingSystem", function () {
       const newDeposit = await savingCore.getDeposit(2);
       expect(newDeposit.principal).to.equal(expectedNewPrincipal);
       
-      // Teacher-Rule 2: Khoản gửi mới phải cập nhật mức lãi suất HIỆN TẠI (1000 bps), 
+      // Khoản gửi mới phải cập nhật mức lãi suất HIỆN TẠI (1000 bps), 
       // chứ không dùng mức lãi suất cũ (800 bps) lúc mở sổ nữa.
       expect(newDeposit.aprBpsAtOpen).to.equal(1000);
     });
