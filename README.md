@@ -26,11 +26,15 @@ This system consists of **3 smart contracts**:
 ```
 AcFinalProject/
 ├── contracts/
-│   ├── MockUSDC.sol        # ERC-20 test token (6 decimals)
-│   ├── VaultManager.sol    # Liquidity vault for interest payouts
-│   └── SavingCore.sol      # Core banking logic + ERC-721 NFT
+│   ├── MockUSDC.sol           # ERC-20 test token (6 decimals)
+│   ├── VaultManager.sol       # Liquidity vault for interest payouts
+│   └── SavingCore.sol         # Core banking logic + ERC-721 NFT
+├── frontend/
+│   ├── index.html             # DApp UI (connect wallet, manage deposits)
+│   └── app.js                 # Frontend logic (Ethers.js v6)
 ├── scripts/
-│   └── demo.js             # Interactive CLI demo script
+│   ├── deploy.js              # Deploy all 3 contracts to localhost
+│   └── demo.js                # Interactive CLI demo script
 ├── test/
 │   └── BankingSystem.test.js  # Unit tests (18 test cases, 97%+ coverage)
 ├── hardhat.config.js
@@ -69,10 +73,23 @@ npx hardhat test
 npx hardhat coverage
 ```
 
-### Run the interactive demo
+### Run the interactive demo (CLI)
 ```bash
 npx hardhat run scripts/demo.js
 ```
+
+### Deploy to Hardhat Localhost
+```bash
+# Terminal 1: start local node
+npx hardhat node
+
+# Terminal 2: deploy contracts
+npx hardhat run scripts/deploy.js --network localhost
+
+# Terminal 3: serve frontend
+npx serve frontend
+```
+Then open `http://localhost:3000` in your browser.
 
 ---
 
@@ -105,19 +122,6 @@ File                |  Stmts  | Branch  |  Funcs  |  Lines  |
 --------------------|---------|---------|---------|---------|
 ```
 
----
-
-## 📐 Token Flow
-
-```
-User ──(USDC)──► SavingCore      (holds principal)
-                     │
-                     └──(interest request)──► VaultManager ──(USDC)──► User
-                                                   ▲
-                                            Admin funds vault
-```
-
----
 
 ## 👨‍💻 Tech Stack
 

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Online Banking System — DApp</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#060d1f;--surface:#0d1b35;--card:#111e38;--border:#1e3a5f;
+  --teal:#00d4aa;--teal2:#00b894;--blue:#0984e3;--red:#e74c3c;
+  --text:#e8f4f8;--muted:#7b95b0;--font:'Inter',sans-serif;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh}
+/* HEADER */
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+.logo{display:flex;align-items:center;gap:12px;font-size:20px;font-weight:700}
+.logo-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--teal),var(--blue));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.wallet-btn{background:linear-gradient(135deg,var(--teal),var(--blue));border:none;color:#fff;padding:10px 20px;border-radius:10px;font-weight:600;cursor:pointer;font-size:14px;transition:.2s}
+.wallet-btn:hover{opacity:.85;transform:translateY(-1px)}
+.wallet-btn.connected{background:transparent;border:1px solid var(--teal);color:var(--teal);font-size:12px}
+/* STATS BAR */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:20px 32px;background:var(--surface);border-bottom:1px solid var(--border)}
+.stat{text-align:center}
+.stat-val{font-size:22px;font-weight:700;color:var(--teal)}
+.stat-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+/* CONTRACT BAR */
+.contracts{background:var(--card);border-bottom:1px solid var(--border);padding:10px 32px;display:flex;gap:24px;font-size:12px;flex-wrap:wrap}
+.contract-item{display:flex;align-items:center;gap:8px;color:var(--muted)}
+.contract-item span{color:var(--text);font-family:monospace;font-size:11px}
+.copy-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:2px 8px;border-radius:4px;cursor:pointer;font-size:10px;transition:.2s}
+.copy-btn:hover{border-color:var(--teal);color:var(--teal)}
+/* MAIN */
+main{padding:24px 32px;max-width:1400px;margin:0 auto}
+/* TABS */
+.tabs{display:flex;gap:4px;background:var(--surface);border-radius:12px;padding:4px;width:fit-content;margin-bottom:24px}
+.tab{padding:10px 24px;border-radius:8px;border:none;background:none;color:var(--muted);cursor:pointer;font-weight:500;font-size:14px;transition:.2s}
+.tab.active{background:linear-gradient(135deg,var(--teal),var(--blue));color:#fff}
+/* CARDS */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;transition:.2s}
+.card:hover{border-color:var(--teal);transform:translateY(-2px)}
+.card-title{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+.card-val{font-size:28px;font-weight:700;color:var(--text)}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-green{background:rgba(0,212,170,.15);color:var(--teal)}
+.badge-red{background:rgba(231,76,60,.15);color:var(--red)}
+.badge-blue{background:rgba(9,132,227,.15);color:var(--blue)}
+.badge-grey{background:rgba(123,149,176,.15);color:var(--muted)}
+/* SECTION */
+.section{margin-bottom:32px}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.section-title{font-size:18px;font-weight:700}
+/* FORM */
+.form-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:12px}
+label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+input,select{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:8px;font-size:14px;outline:none;transition:.2s;font-family:var(--font)}
+input:focus,select:focus{border-color:var(--teal)}
+.btn{padding:10px 20px;border-radius:10px;border:none;font-weight:600;cursor:pointer;font-size:14px;transition:.2s;font-family:var(--font)}
+.btn-primary{background:linear-gradient(135deg,var(--teal),var(--blue));color:#fff}
+.btn-primary:hover{opacity:.85;transform:translateY(-1px)}
+.btn-outline{background:none;border:1px solid var(--border);color:var(--text)}
+.btn-outline:hover{border-color:var(--teal);color:var(--teal)}
+.btn-danger{background:none;border:1px solid var(--red);color:var(--red)}
+.btn-danger:hover{background:rgba(231,76,60,.1)}
+.btn-sm{padding:6px 14px;font-size:12px}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}
+/* DEPOSIT CARD */
+.dep-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;transition:.2s}
+.dep-card:hover{border-color:var(--teal)}
+.dep-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:13px}
+.dep-row .key{color:var(--muted)}
+.dep-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+/* PLAN CARD */
+.plan-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;cursor:pointer;transition:.2s}
+.plan-card:hover{border-color:var(--teal);transform:translateY(-2px)}
+.plan-apr{font-size:36px;font-weight:700;color:var(--teal);line-height:1}
+/* TOAST */
+.toast{position:fixed;bottom:32px;right:32px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 20px;font-size:14px;max-width:360px;z-index:9999;animation:fadeIn .3s;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.toast.success{border-color:var(--teal)}
+.toast.error{border-color:var(--red)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}}
+/* PANEL */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px}
+.panel-title{font-size:16px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+/* EMPTY */
+.empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty-icon{font-size:48px;margin-bottom:12px}
+/* PROGRESS */
+.progress{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:8px}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--teal),var(--blue));border-radius:2px;transition:width .5s}
+/* HIDDEN */
+.hidden{display:none!important}
+/* DIVIDER */
+hr{border:none;border-top:1px solid var(--border);margin:20px 0}
+/* ADMIN TAG */
+.admin-tag{background:rgba(255,193,7,.15);color:#f39c12;border:1px solid rgba(255,193,7,.3);border-radius:6px;padding:2px 10px;font-size:11px;font-weight:600}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">🏦</div>
+    <div>
+      <div>Online Banking System</div>
+      <div style="font-size:11px;color:var(--muted);font-weight:400">Blockchain DApp — Hardhat Localhost</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <div id="networkBadge" class="badge badge-grey hidden">Hardhat</div>
+    <button id="walletBtn" class="wallet-btn" onclick="openConnectModal()">🔌 Chọn Tài Khoản</button>
+  </div>
+</header>
+
+<!-- CONNECT MODAL -->
+<div id="connectModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;display:flex;align-items:center;justify-content:center" onclick="if(event.target===this)closeModal()">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:32px;width:480px;max-width:95vw">
+    <div style="font-size:18px;font-weight:700;margin-bottom:8px">🔐 Kết nối Tài Khoản</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:24px">Chọn cách kết nối với Hardhat Localhost</div>
+
+    <div style="margin-bottom:20px">
+      <label style="font-size:13px;font-weight:600;margin-bottom:8px;display:block">Chọn tài khoản Hardhat có sẵn:</label>
+      <select id="presetAccount" style="width:100%;margin-bottom:12px" onchange="fillPK()">
+        <option value="">-- Chọn tài khoản --</option>
+        <option value="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80">Account #0 — Deployer (Admin)</option>
+        <option value="0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d">Account #1 — User 1</option>
+        <option value="0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a">Account #2 — User 2</option>
+        <option value="0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6">Account #3 — User 3</option>
+      </select>
+      <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block">Hoặc nhập Private Key thủ công:</label>
+      <input id="pkInput" type="password" placeholder="0xac0974..." style="width:100%;margin-bottom:16px">
+      <button class="btn btn-primary" style="width:100%" onclick="connectWithPK()">✅ Kết nối</button>
+    </div>
+
+    <div style="border-top:1px solid var(--border);padding-top:16px">
+      <button class="btn btn-outline" style="width:100%" onclick="connectWallet()">🦊 Kết nối MetaMask</button>
+    </div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat"><div class="stat-val" id="myBalance">—</div><div class="stat-lbl">Số dư USDC</div></div>
+  <div class="stat"><div class="stat-val" id="vaultBal">—</div><div class="stat-lbl">Vault Balance</div></div>
+  <div class="stat"><div class="stat-val" id="totalPlans">—</div><div class="stat-lbl">Gói tiết kiệm</div></div>
+  <div class="stat"><div class="stat-val" id="myDeposits">—</div><div class="stat-lbl">Sổ của tôi</div></div>
+</div>
+
+<!-- CONTRACT ADDRESSES -->
+<div class="contracts">
+  <div class="contract-item">💰 MockUSDC: <span id="addrUSDC">0x5FbDB...0aa3</span><button class="copy-btn" onclick="copy('0x5FbDB2315678afecb367f032d93F642f64180aa3')">Copy</button></div>
+  <div class="contract-item">🔐 VaultManager: <span id="addrVault">0xe7f17...0512</span><button class="copy-btn" onclick="copy('0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512')">Copy</button></div>
+  <div class="contract-item">📄 SavingCore: <span id="addrCore">0x9fE46...a6e0</span><button class="copy-btn" onclick="copy('0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0')">Copy</button></div>
+</div>
+
+<!-- MAIN -->
+<main>
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('plans',this)">📋 Gói Tiết Kiệm</button>
+    <button class="tab" onclick="showTab('deposits',this)">📂 Sổ Của Tôi</button>
+    <button class="tab" onclick="showTab('admin',this)">⚙️ Admin</button>
+  </div>
+
+  <!-- TAB: PLANS -->
+  <div id="tab-plans">
+    <div class="section-header">
+      <div class="section-title">Các Gói Tiết Kiệm</div>
+      <button class="btn btn-primary btn-sm" onclick="loadPlans()">🔄 Làm mới</button>
+    </div>
+    <div id="plansList" class="grid"><div class="empty"><div class="empty-icon">📋</div><div>Kết nối ví để xem các gói</div></div></div>
+
+    <hr>
+    <div class="panel">
+      <div class="panel-title">💳 Mở Sổ Tiết Kiệm Mới</div>
+      <div class="form-row">
+        <div><label>Chọn Gói (Plan ID)</label><input id="openPlanId" type="number" placeholder="1" min="1"></div>
+        <div><label>Số tiền gửi (USDC)</label><input id="openAmount" type="number" placeholder="1000" step="1"></div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-outline" onclick="mintUSDC()">🪙 Mint USDC Test</button>
+        <button class="btn btn-primary" onclick="openDeposit()">✅ Mở Sổ Tiết Kiệm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: DEPOSITS -->
+  <div id="tab-deposits" class="hidden">
+    <div class="section-header">
+      <div class="section-title">Sổ Tiết Kiệm Của Tôi</div>
+      <button class="btn btn-primary btn-sm" onclick="loadDeposits()">🔄 Làm mới</button>
+    </div>
+    <div id="depositsList"><div class="empty"><div class="empty-icon">📂</div><div>Kết nối ví để xem sổ tiết kiệm</div></div></div>
+  </div>
+
+  <!-- TAB: ADMIN -->
+  <div id="tab-admin" class="hidden">
+    <div id="adminGuard" class="empty"><div class="empty-icon">🔐</div><div>Chỉ Owner mới truy cập được tab này</div></div>
+    <div id="adminContent" class="hidden">
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:24px">
+        <div class="admin-tag">👑 ADMIN MODE</div>
+        <span style="color:var(--muted);font-size:13px" id="ownerAddr"></span>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">🏦 Quản lý Vault</div>
+        <div class="form-row">
+          <div><label>Mint USDC cho Admin (bước 1)</label><input id="mintAdminAmount" type="number" placeholder="100000"></div>
+          <div><label>Nạp tiền vào Vault (bước 2)</label><input id="fundAmount" type="number" placeholder="100000"></div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-outline" onclick="mintForAdmin()">🪙 Mint USDC cho Admin</button>
+          <button class="btn btn-primary" onclick="fundVault()">💰 Nạp Vault</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">➕ Tạo Gói Tiết Kiệm Mới</div>
+        <div class="form-row">
+          <div><label>Kỳ hạn (ngày)</label><input id="pTenor" type="number" placeholder="90"></div>
+          <div><label>Lãi suất APR (%)</label><input id="pApr" type="number" placeholder="8" step="0.1"></div>
+          <div><label>Gửi tối thiểu (USDC)</label><input id="pMin" type="number" placeholder="100"></div>
+          <div><label>Gửi tối đa (USDC)</label><input id="pMax" type="number" placeholder="10000"></div>
+          <div><label>Phạt rút sớm (%)</label><input id="pPenalty" type="number" placeholder="5"></div>
+        </div>
+        <button class="btn btn-primary" onclick="createPlan()">✅ Tạo Gói</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
