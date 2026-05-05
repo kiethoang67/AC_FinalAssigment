@@ -161,8 +161,8 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0}
   <!-- TABS -->
   <div class="tabs">
     <button class="tab active" onclick="showTab('plans',this)">📋 Gói Tiết Kiệm</button>
-    <button class="tab" onclick="showTab('deposits',this)">📂 Sổ Của Tôi</button>
-    <button class="tab" onclick="showTab('admin',this)">⚙️ Admin</button>
+    <button class="tab" id="depositsTabBtn" onclick="showTab('deposits',this)">📂 Sổ Của Tôi</button>
+    <button class="tab hidden" id="adminTabBtn" onclick="showTab('admin',this)">⚙️ Admin</button>
   </div>
 
   <!-- TAB: PLANS -->
@@ -174,7 +174,7 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0}
     <div id="plansList" class="grid"><div class="empty"><div class="empty-icon">📋</div><div>Kết nối ví để xem các gói</div></div></div>
 
     <hr>
-    <div class="panel">
+    <div id="openDepositPanel" class="panel">
       <div class="panel-title">💳 Mở Sổ Tiết Kiệm Mới</div>
       <div class="form-row">
         <div><label>Chọn Gói (Plan ID)</label><input id="openPlanId" type="number" placeholder="1" min="1"></div>

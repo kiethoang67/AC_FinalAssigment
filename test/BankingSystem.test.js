@@ -112,8 +112,8 @@ describe("BankingSystem", function () {
   });
 
   describe("Early Withdraw", function () {
-    it("Should deduct 5% penalty, pay 0 interest, and send penalty to feeReceiver", async function () {
-      const { token, savingCore, feeReceiver, user1, parseUSDC } = await loadFixture(deployBankingSystemFixture);
+    it("Should deduct 5% penalty, pay 0 interest, and send penalty to VaultManager", async function () {
+      const { token, savingCore, vaultManager, user1, parseUSDC } = await loadFixture(deployBankingSystemFixture);
 
       const depositAmount = parseUSDC(1000);
       const planId = 1;
@@ -129,7 +129,7 @@ describe("BankingSystem", function () {
       const expectedPenalty = parseUSDC(50);
       const expectedReturn = depositAmount - expectedPenalty; // 950 USDC
 
-      const feeReceiverBalanceBefore = await token.balanceOf(feeReceiver.address);
+      const vaultBalanceBefore = await token.balanceOf(await vaultManager.getAddress());
       const userBalanceBefore = await token.balanceOf(user1.address);
 
       // Thực hiện rút sớm (Early Withdraw)
@@ -141,9 +141,9 @@ describe("BankingSystem", function () {
       const userBalanceAfter = await token.balanceOf(user1.address);
       expect(userBalanceAfter - userBalanceBefore).to.equal(expectedReturn);
 
-      // Kiểm tra feeReceiver nhận được phí phạt (50 USDC)
-      const feeReceiverBalanceAfter = await token.balanceOf(feeReceiver.address);
-      expect(feeReceiverBalanceAfter - feeReceiverBalanceBefore).to.equal(expectedPenalty);
+      // Kiểm tra VaultManager nhận được phí phạt (50 USDC)
+      const vaultBalanceAfter = await token.balanceOf(await vaultManager.getAddress());
+      expect(vaultBalanceAfter - vaultBalanceBefore).to.equal(expectedPenalty);
     });
   });
 

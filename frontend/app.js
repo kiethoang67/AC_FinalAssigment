@@ -119,16 +119,27 @@ async function refreshStats() {
   } catch(e) { console.error(e); }
 }
 
-// ─── CHECK ADMIN ──────────────────────────────────────────────
+// ─── CHECK ADMIN & APPLY ROLE UI ─────────────────────────────
 async function checkAdmin() {
   try {
     const owner = await coreContract.owner();
-    if (owner.toLowerCase() === userAddr.toLowerCase()) {
+    const isAdmin = owner.toLowerCase() === userAddr.toLowerCase();
+
+    if (isAdmin) {
+      // ADMIN: show admin tab, hide deposit panel & sổ tab
+      document.getElementById("adminTabBtn").classList.remove("hidden");
+      document.getElementById("depositsTabBtn").classList.add("hidden");
+      document.getElementById("openDepositPanel").classList.add("hidden");
       document.getElementById("adminGuard").classList.add("hidden");
       document.getElementById("adminContent").classList.remove("hidden");
       document.getElementById("ownerAddr").textContent = userAddr;
+    } else {
+      // USER: hide admin tab, show deposit panel & sổ tab
+      document.getElementById("adminTabBtn").classList.add("hidden");
+      document.getElementById("depositsTabBtn").classList.remove("hidden");
+      document.getElementById("openDepositPanel").classList.remove("hidden");
     }
-  } catch(e) {}
+  } catch(e) { console.error(e); }
 }
 
 // ─── PLANS ────────────────────────────────────────────────────

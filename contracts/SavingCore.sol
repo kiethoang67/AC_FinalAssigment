@@ -424,10 +424,9 @@ contract SavingCore is ERC721, Ownable, Pausable {
         uint256 penalty = (dep.principal * dep.penaltyBpsAtOpen) / BPS_DENOMINATOR;
         uint256 userReceives = dep.principal - penalty;
 
-        // ── Transfer penalty to feeReceiver ───────
+        // ── Transfer penalty to VaultManager (tăng thanh khoản vault) ──
         if (penalty > 0) {
-            address receiver = vaultManager.feeReceiver();
-            token.safeTransfer(receiver, penalty);
+            token.safeTransfer(address(vaultManager), penalty);
         }
 
         // ── Transfer remaining principal to user ──
