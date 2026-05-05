@@ -111,78 +111,79 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0}
   </div>
   <div style="display:flex;align-items:center;gap:12px">
     <div id="networkBadge" class="badge badge-grey hidden">Hardhat</div>
-    <button id="walletBtn" class="wallet-btn" onclick="openConnectModal()">🔌 Chọn Tài Khoản</button>
+    <button id="walletBtn" class="wallet-btn" onclick="openConnectModal()">🔌 Connect Wallet</button>
   </div>
 </header>
 
 <!-- CONNECT MODAL -->
 <div id="connectModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;display:flex;align-items:center;justify-content:center" onclick="if(event.target===this)closeModal()">
   <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:32px;width:480px;max-width:95vw">
-    <div style="font-size:18px;font-weight:700;margin-bottom:8px">🔐 Kết nối Tài Khoản</div>
-    <div style="font-size:13px;color:var(--muted);margin-bottom:24px">Chọn cách kết nối với Hardhat Localhost</div>
+    <div style="font-size:18px;font-weight:700;margin-bottom:8px">🔐 Connect Wallet</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:24px">Select connection method for Hardhat Localhost</div>
 
     <div style="margin-bottom:20px">
-      <label style="font-size:13px;font-weight:600;margin-bottom:8px;display:block">Chọn tài khoản Hardhat có sẵn:</label>
+      <label style="font-size:13px;font-weight:600;margin-bottom:8px;display:block">Select a preset Hardhat account:</label>
       <select id="presetAccount" style="width:100%;margin-bottom:12px" onchange="fillPK()">
-        <option value="">-- Chọn tài khoản --</option>
-        <option value="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80">Account #0 — Deployer (Admin)</option>
+        <option value="">-- Select an account --</option>
+        <option value="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80">Account #0 — 👑 Admin/Deployer</option>
         <option value="0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d">Account #1 — User 1</option>
         <option value="0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a">Account #2 — User 2</option>
         <option value="0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6">Account #3 — User 3</option>
+        <option value="0x47e179ec197488593b187f80a00eb0da91f1b9d0b13f8733639f19c30a34926b">Account #4 — User 4</option>
       </select>
-      <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block">Hoặc nhập Private Key thủ công:</label>
+      <label style="font-size:12px;color:var(--muted);margin-bottom:4px;display:block">Or enter Private Key manually:</label>
       <input id="pkInput" type="password" placeholder="0xac0974..." style="width:100%;margin-bottom:16px">
-      <button class="btn btn-primary" style="width:100%" onclick="connectWithPK()">✅ Kết nối</button>
+      <button class="btn btn-primary" style="width:100%" onclick="connectWithPK()">✅ Connect</button>
     </div>
 
     <div style="border-top:1px solid var(--border);padding-top:16px">
-      <button class="btn btn-outline" style="width:100%" onclick="connectWallet()">🦊 Kết nối MetaMask</button>
+      <button class="btn btn-outline" style="width:100%" onclick="connectWallet()">🦊 Connect MetaMask</button>
     </div>
   </div>
 </div>
 
 <!-- STATS -->
 <div class="stats">
-  <div class="stat"><div class="stat-val" id="myBalance">—</div><div class="stat-lbl">Số dư USDC</div></div>
+  <div class="stat"><div class="stat-val" id="myBalance">—</div><div class="stat-lbl">USDC Balance</div></div>
   <div class="stat"><div class="stat-val" id="vaultBal">—</div><div class="stat-lbl">Vault Balance</div></div>
-  <div class="stat"><div class="stat-val" id="totalPlans">—</div><div class="stat-lbl">Gói tiết kiệm</div></div>
-  <div class="stat"><div class="stat-val" id="myDeposits">—</div><div class="stat-lbl">Sổ của tôi</div></div>
+  <div class="stat"><div class="stat-val" id="totalPlans">—</div><div class="stat-lbl">Savings Plans</div></div>
+  <div class="stat"><div class="stat-val" id="myDeposits">—</div><div class="stat-lbl">My Deposits</div></div>
 </div>
 
 <!-- CONTRACT ADDRESSES -->
 <div class="contracts">
-  <div class="contract-item">💰 MockUSDC: <span id="addrUSDC">0x5FbDB...0aa3</span><button class="copy-btn" onclick="copy('0x5FbDB2315678afecb367f032d93F642f64180aa3')">Copy</button></div>
-  <div class="contract-item">🔐 VaultManager: <span id="addrVault">0xe7f17...0512</span><button class="copy-btn" onclick="copy('0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512')">Copy</button></div>
-  <div class="contract-item">📄 SavingCore: <span id="addrCore">0x9fE46...a6e0</span><button class="copy-btn" onclick="copy('0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0')">Copy</button></div>
+  <div class="contract-item">💰 MockUSDC: <span>0x2279...eBe6</span><button class="copy-btn" onclick="copy('0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6')">Copy</button></div>
+  <div class="contract-item">🔐 VaultManager: <span>0x8A79...C318</span><button class="copy-btn" onclick="copy('0x8A791620dd6260079BF849Dc5567aDC3F2FdC318')">Copy</button></div>
+  <div class="contract-item">📄 SavingCore: <span>0x6101...AD788</span><button class="copy-btn" onclick="copy('0x610178dA211FEF7D417bC0e6FeD39F05609AD788')">Copy</button></div>
 </div>
 
 <!-- MAIN -->
 <main>
   <!-- TABS -->
   <div class="tabs">
-    <button class="tab active" onclick="showTab('plans',this)">📋 Gói Tiết Kiệm</button>
-    <button class="tab" id="depositsTabBtn" onclick="showTab('deposits',this)">📂 Sổ Của Tôi</button>
+    <button class="tab active" onclick="showTab('plans',this)">📋 Savings Plans</button>
+    <button class="tab" id="depositsTabBtn" onclick="showTab('deposits',this)">📂 My Deposits</button>
     <button class="tab hidden" id="adminTabBtn" onclick="showTab('admin',this)">⚙️ Admin</button>
   </div>
 
   <!-- TAB: PLANS -->
   <div id="tab-plans">
     <div class="section-header">
-      <div class="section-title">Các Gói Tiết Kiệm</div>
-      <button class="btn btn-primary btn-sm" onclick="loadPlans()">🔄 Làm mới</button>
+      <div class="section-title">Savings Plans</div>
+      <button class="btn btn-primary btn-sm" onclick="loadPlans()">🔄 Refresh</button>
     </div>
-    <div id="plansList" class="grid"><div class="empty"><div class="empty-icon">📋</div><div>Kết nối ví để xem các gói</div></div></div>
+    <div id="plansList" class="grid"><div class="empty"><div class="empty-icon">📋</div><div>Connect wallet to view plans</div></div></div>
 
     <hr>
     <div id="openDepositPanel" class="panel">
-      <div class="panel-title">💳 Mở Sổ Tiết Kiệm Mới</div>
+      <div class="panel-title">💳 Open New Deposit</div>
       <div class="form-row">
-        <div><label>Chọn Gói (Plan ID)</label><input id="openPlanId" type="number" placeholder="1" min="1"></div>
-        <div><label>Số tiền gửi (USDC)</label><input id="openAmount" type="number" placeholder="1000" step="1"></div>
+        <div><label>Select Plan (Plan ID)</label><input id="openPlanId" type="number" placeholder="1" min="1"></div>
+        <div><label>Deposit Amount (USDC)</label><input id="openAmount" type="number" placeholder="1000" step="1"></div>
       </div>
       <div style="display:flex;gap:10px">
-        <button class="btn btn-outline" onclick="mintUSDC()">🪙 Mint USDC Test</button>
-        <button class="btn btn-primary" onclick="openDeposit()">✅ Mở Sổ Tiết Kiệm</button>
+        <button class="btn btn-outline" onclick="mintUSDC()">🪙 Mint Test USDC</button>
+        <button class="btn btn-primary" onclick="openDeposit()">✅ Open Deposit</button>
       </div>
     </div>
   </div>
@@ -190,15 +191,15 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0}
   <!-- TAB: DEPOSITS -->
   <div id="tab-deposits" class="hidden">
     <div class="section-header">
-      <div class="section-title">Sổ Tiết Kiệm Của Tôi</div>
-      <button class="btn btn-primary btn-sm" onclick="loadDeposits()">🔄 Làm mới</button>
+      <div class="section-title">My Deposits</div>
+      <button class="btn btn-primary btn-sm" onclick="loadDeposits()">🔄 Refresh</button>
     </div>
-    <div id="depositsList"><div class="empty"><div class="empty-icon">📂</div><div>Kết nối ví để xem sổ tiết kiệm</div></div></div>
+    <div id="depositsList"><div class="empty"><div class="empty-icon">📂</div><div>Connect wallet to view deposits</div></div></div>
   </div>
 
   <!-- TAB: ADMIN -->
   <div id="tab-admin" class="hidden">
-    <div id="adminGuard" class="empty"><div class="empty-icon">🔐</div><div>Chỉ Owner mới truy cập được tab này</div></div>
+    <div id="adminGuard" class="empty"><div class="empty-icon">🔐</div><div>Only Owner can access this tab</div></div>
     <div id="adminContent" class="hidden">
       <div style="display:flex;gap:10px;align-items:center;margin-bottom:24px">
         <div class="admin-tag">👑 ADMIN MODE</div>
@@ -206,28 +207,79 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0}
       </div>
 
       <div class="panel">
-        <div class="panel-title">🏦 Quản lý Vault</div>
+        <div class="panel-title">🏦 Vault Management</div>
         <div class="form-row">
-          <div><label>Mint USDC cho Admin (bước 1)</label><input id="mintAdminAmount" type="number" placeholder="100000"></div>
-          <div><label>Nạp tiền vào Vault (bước 2)</label><input id="fundAmount" type="number" placeholder="100000"></div>
+          <div><label>Mint USDC for Admin (Step 1)</label><input id="mintAdminAmount" type="number" placeholder="100000"></div>
+          <div><label>Fund Vault (Step 2)</label><input id="fundAmount" type="number" placeholder="100000"></div>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn btn-outline" onclick="mintForAdmin()">🪙 Mint USDC cho Admin</button>
-          <button class="btn btn-primary" onclick="fundVault()">💰 Nạp Vault</button>
+          <button class="btn btn-outline" onclick="mintForAdmin()">🪙 Mint USDC for Admin</button>
+          <button class="btn btn-primary" onclick="fundVault()">💰 Fund Vault</button>
         </div>
       </div>
 
       <div class="panel">
-        <div class="panel-title">➕ Tạo Gói Tiết Kiệm Mới</div>
+        <div class="panel-title">➕ Create New Plan</div>
         <div class="form-row">
-          <div><label>Kỳ hạn (ngày)</label><input id="pTenor" type="number" placeholder="90"></div>
-          <div><label>Lãi suất APR (%)</label><input id="pApr" type="number" placeholder="8" step="0.1"></div>
-          <div><label>Gửi tối thiểu (USDC)</label><input id="pMin" type="number" placeholder="100"></div>
-          <div><label>Gửi tối đa (USDC)</label><input id="pMax" type="number" placeholder="10000"></div>
-          <div><label>Phạt rút sớm (%)</label><input id="pPenalty" type="number" placeholder="5"></div>
+          <div><label>Tenor (Days)</label><input id="pTenor" type="number" placeholder="90"></div>
+          <div><label>Interest APR (%)</label><input id="pApr" type="number" placeholder="8" step="0.1"></div>
+          <div><label>Min Deposit (USDC)</label><input id="pMin" type="number" placeholder="100"></div>
+          <div><label>Max Deposit (USDC)</label><input id="pMax" type="number" placeholder="10000"></div>
+          <div><label>Early Withdrawal Penalty (%)</label><input id="pPenalty" type="number" placeholder="5"></div>
         </div>
-        <button class="btn btn-primary" onclick="createPlan()">✅ Tạo Gói</button>
+        <button class="btn btn-primary" onclick="createPlan()">✅ Create Plan</button>
       </div>
+
+      <div class="panel">
+        <div class="panel-title">🔄 Update Plan APR</div>
+        <div class="form-row">
+          <div><label>Plan ID</label><input id="updatePlanId" type="number" placeholder="1"></div>
+          <div><label>New APR (%)</label><input id="updateApr" type="number" placeholder="10" step="0.1"></div>
+        </div>
+        <button class="btn btn-outline" onclick="updatePlanApr()">📝 Update APR</button>
+      </div>
+
+      <div class="panel" style="border-color:rgba(231,76,60,.3)">
+        <div class="panel-title">🛡️ System Controls</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:14px">
+          Status: <span id="pauseStatus" style="font-weight:700;color:var(--teal)">Active ✅</span>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-outline" id="pauseBtn" onclick="togglePause()">⏸️ Pause System</button>
+          <button class="btn btn-danger" onclick="adminWithdrawVault()">💸 Withdraw Vault (Admin)</button>
+        </div>
+      </div>
+
+      <div class="panel" style="border-color:rgba(255,193,7,.3);background:rgba(255,193,7,.04)">
+        <div class="panel-title">🧪 Developer Tools — Time Travel</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:14px">For testing only. Increase blockchain time to mature deposits.</div>
+
+        <div style="background:rgba(255,255,255,.05);border-radius:8px;padding:10px;margin-bottom:12px;font-size:13px">
+          🕐 Current blockchain time: <span id="chainTimestamp" style="color:var(--teal);font-weight:600">Not checked</span>
+          <button class="btn btn-outline" style="padding:4px 10px;font-size:11px;margin-left:8px" onclick="checkChainTime()">Check</button>
+        </div>
+
+        <div class="form-row">
+          <div><label>Days to fast forward</label><input id="fastForwardDays" type="number" placeholder="90" value="91"></div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+          <button class="btn btn-outline" onclick="fastForward()">⏩ Fast Forward</button>
+        </div>
+        <hr style="margin:12px 0">
+        <div style="font-size:13px;font-weight:600;margin-bottom:10px">🔍 View All Deposits</div>
+        <div style="display:flex;gap:10px;margin-bottom:10px">
+          <input id="viewDepositId" type="number" placeholder="Deposit ID (e.g., 1)" style="flex:1">
+          <button class="btn btn-outline" onclick="adminViewDeposit()">👁️ View Deposit</button>
+        </div>
+        <div id="adminDepositInfo" style="font-size:12px;background:rgba(255,255,255,.04);border-radius:8px;padding:10px;display:none"></div>
+        <hr style="margin:12px 0">
+        <div style="font-size:13px;font-weight:600;margin-bottom:10px">Auto Renew Deposit</div>
+        <div class="form-row">
+          <div><label>Deposit ID</label><input id="autoRenewId" type="number" placeholder="1"></div>
+        </div>
+        <button class="btn btn-primary" onclick="doAutoRenew()">🔄 Auto Renew</button>
+      </div>
+
     </div>
   </div>
 </main>

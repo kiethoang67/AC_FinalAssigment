@@ -1,132 +1,79 @@
-# 🏦 Online Banking System — Blockchain Final Project
+# 🏦 Online Banking System — Blockchain DApp
 
-A decentralized **Online Banking System** built with **Solidity 0.8.28** and **Hardhat**, simulating core banking features such as term deposits, interest calculation, early withdrawal penalties, and automated deposit renewal — all powered by ERC-20 tokens and ERC-721 NFT certificates.
+A decentralized **Online Banking System** built with **Solidity 0.8.28** and **Hardhat**, simulating core banking features such as term deposits, interest calculation, early withdrawal penalties, and automated deposit renewal.
 
 ---
 
-## 📌 Project Overview
+## 1. Project Overview & Architecture
 
-This system consists of **3 smart contracts**:
+The project aims to bring traditional term-deposit banking logic into a decentralized environment (DeFi). Users can deposit stablecoins (USDC) into predefined savings plans and earn interest over time. 
 
-| Contract | Role |
+**Key Architectural Decisions:**
+- **ERC-721 as Certificates:** Every deposit created by a user mints a unique NFT (ERC-721). The `tokenId` acts directly as the `depositId`. Owning the NFT means owning the principal and the accrued interest.
+- **Segregation of Funds:** 
+  - **Principal** is locked securely in the core banking contract.
+  - **Interest** is paid out from a separate Vault contract, simulating a bank's liquidity pool.
+- **Role-Based Access Control (RBAC):** The system distinguishes between the `Admin/Deployer` (who manages the vault, creates plans, and controls the system pause state) and normal `Users` (who open and manage deposits).
+
+---
+
+## 2. Components & Smart Contract Architecture
+
+The system is powered by **3 core smart contracts**:
+
+| Component | Role in Architecture |
 |---|---|
-| `MockUSDC` | ERC-20 token (6 decimals) simulating USDC stablecoin |
-| `VaultManager` | Bank's liquidity pool — holds capital to pay interest |
-| `SavingCore` | Core banking logic — manages saving plans, deposits (NFT), withdrawals, and renewals |
+| `MockUSDC.sol` | **The Currency:** An ERC-20 token (with 6 decimals) simulating a fiat-pegged stablecoin like USDC. Used for all deposits and payouts. |
+| `VaultManager.sol` | **The Liquidity Pool:** Holds the bank's capital to pay out interest. It is controlled by the Admin, but only the core contract can request funds from it to pay users upon maturity. |
+| `SavingCore.sol` | **The Core Logic:** Inherits from `ERC721`, `Ownable`, and `Pausable`. It manages the creation of savings plans, handles user deposits (minting NFTs), calculates compound interest, and executes withdrawals/renewals. |
 
-### 🔑 Key Design
-- Each **Saving Certificate** is an **ERC-721 NFT** (`tokenId = depositId`)
-- **Principal** is held in `SavingCore`; **Interest** is paid from `VaultManager`
-- Ownership of the NFT = ownership of the deposit
-
----
-
-## 🗂️ Project Structure
-
-```
-AcFinalProject/
-├── contracts/
-│   ├── MockUSDC.sol           # ERC-20 test token (6 decimals)
-│   ├── VaultManager.sol       # Liquidity vault for interest payouts
-│   └── SavingCore.sol         # Core banking logic + ERC-721 NFT
-├── frontend/
-│   ├── index.html             # DApp UI (connect wallet, manage deposits)
-│   └── app.js                 # Frontend logic (Ethers.js v6)
-├── scripts/
-│   ├── deploy.js              # Deploy all 3 contracts to localhost
-│   └── demo.js                # Interactive CLI demo script
-├── test/
-│   └── BankingSystem.test.js  # Unit tests (18 test cases, 97%+ coverage)
-├── hardhat.config.js
-└── package.json
-```
+**Smart Contract Data Flow:**
+1. **Deposit:** User transfers USDC to `SavingCore` → `SavingCore` mints an NFT certificate to the user.
+2. **Withdrawal (Maturity):** User burns NFT → `SavingCore` returns Principal → `SavingCore` requests Interest from `VaultManager` → User receives Principal + Interest.
+3. **Withdrawal (Early):** User burns NFT → `SavingCore` deducts penalty → `SavingCore` sends penalty to `VaultManager` fee receiver → User receives remaining Principal.
 
 ---
 
-## ⚙️ Setup & Installation
+## 3. Front-End & How to Run
 
+### Front-End Implementation
+The front-end is built using vanilla HTML/CSS and Javascript, communicating with the blockchain via **Ethers.js v6**. 
+- **Admin Dashboard:** Automatically appears when the deployer account connects. It allows the admin to mint USDC, fund the vault, create/update savings plans, trigger an emergency pause, and use "Developer Tools" to time-travel (manipulate the blockchain timestamp) for testing maturity.
+- **User Dashboard:** Allows users to view available savings plans, deposit funds, track time elapsed via a progress bar, and choose to withdraw or renew their deposits.
+
+### 🚀 How to Run the Project locally
+
+**Step 1: Install Dependencies**
 ```bash
-# Clone the repository
-git clone https://github.com/kiethoang67/AC_FinalAssigment.git
-cd AC_FinalAssigment
-
-# Install dependencies
 npm install
 ```
 
----
-
-## 🚀 How to Run
-
-### Compile contracts
+**Step 2: Start the Local Blockchain Node**
+Open a terminal and start the Hardhat network:
 ```bash
-npx hardhat compile
-```
-
-### Run unit tests
-```bash
-npx hardhat test
-```
-
-### Check test coverage (target: > 90%)
-```bash
-npx hardhat coverage
-```
-
-### Run the interactive demo (CLI)
-```bash
-npx hardhat run scripts/demo.js
-```
-
-### Deploy to Hardhat Localhost
-```bash
-# Terminal 1: start local node
 npx hardhat node
+```
 
-# Terminal 2: deploy contracts
+**Step 3: Deploy the Smart Contracts**
+Open a **second terminal** and deploy the contracts to the local node. (This script also auto-updates the frontend with the new contract addresses).
+```bash
 npx hardhat run scripts/deploy.js --network localhost
+```
 
-# Terminal 3: serve frontend
+**Step 4: Serve the Front-End**
+In the same or a **third terminal**, run the frontend server:
+```bash
 npx serve frontend
 ```
-Then open `http://localhost:3000` in your browser.
+Then open `http://localhost:3000` in your web browser. 
+
+*(Tip: In the DApp, choose "Account #0" from the dropdown to access the Admin Panel, or "Account #1" to act as a normal user).*
 
 ---
-
-## 🎬 Interactive Demo Scenarios
-
-The `scripts/demo.js` walks through **6 complete scenarios** with step-by-step terminal prompts:
-
-| # | Scenario | Key Function |
-|---|---|---|
-| 1 | Deposit → wait for maturity → withdraw (Gốc + Lãi) | `openDeposit` → `withdrawAtMaturity` |
-| 2 | Deposit → early withdrawal (5% penalty, 0 interest) | `openDeposit` → `earlyWithdraw` |
-| 3 | **Best-Effort Payout**: Vault runs dry → still succeeds | `withdrawAtMaturity` + `PartialInterestPaid` event |
-| 4 | Manual renewal — compound interest into new principal | `openDeposit` → `renewDeposit` |
-| 5 | **Auto-Renew Fix APR**: applies current market APR | `autoRenewDeposit` (new APR, not snapshot) |
-| 6 | **Max Deposit Guard**: auto-renew blocked if exceeds limit | `autoRenewDeposit` → revert `AboveMaxDeposit` |
-
----
-
-## 🧪 Test Coverage Results
-
-```
---------------------|---------|---------|---------|---------|
-File                |  Stmts  | Branch  |  Funcs  |  Lines  |
---------------------|---------|---------|---------|---------|
- MockUSDC.sol       |   100%  |  100%   |  100%   |  100%   |
- SavingCore.sol     |  98.8%  |  63.3%  |  93.3%  |  97.2%  |
- VaultManager.sol   |  96.3%  |  61.9%  |  100%   |  100%   |
---------------------|---------|---------|---------|---------|
- All files          |  98.2%  |  62.9%  |  96.4%  |  97.9%  |
---------------------|---------|---------|---------|---------|
-```
-
 
 ## 👨‍💻 Tech Stack
 
-- **Solidity** `0.8.28`
-- **Hardhat** `^2.22.0`
-- **OpenZeppelin Contracts** `^5.6.1` (ERC721, ERC20, SafeERC20, Ownable, Pausable)
-- **Ethers.js** `v6`
-- **solidity-coverage** for test coverage reporting
+- **Smart Contracts:** Solidity `0.8.28`, OpenZeppelin Contracts `^5.6.1`
+- **Development Environment:** Hardhat `^2.22.0`
+- **Front-End:** HTML5, CSS3, JavaScript, Ethers.js `v6`
+- **Testing:** Mocha/Chai (`npx hardhat test`), Solidity-Coverage
