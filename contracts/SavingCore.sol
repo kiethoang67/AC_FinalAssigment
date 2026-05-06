@@ -130,6 +130,9 @@ contract SavingCore is ERC721, Ownable, Pausable {
      */
     mapping(uint256 => Deposit) public deposits;
 
+    /// @notice Tracks unpaid interest owed to each user due to insufficient Vault balance.
+    mapping(address => uint256) public userDebt;
+
     // ══════════════════════════════════════════════
     //  Events (as required by the assignment)
     // ══════════════════════════════════════════════
@@ -380,22 +383,27 @@ contract SavingCore is ERC721, Ownable, Pausable {
 
         dep.status = DepositStatus.Withdrawn;
 
-        // ── Calculate simple interest ─────────────
+        // ── Calculate simple interest + Debt ─────────────
         uint256 tenorSeconds = dep.tenorDays * 1 days;
         uint256 interest = (dep.principal * dep.aprBpsAtOpen * tenorSeconds)
             / (SECONDS_PER_YEAR * BPS_DENOMINATOR);
+            
+        uint256 totalOwed = interest + userDebt[msg.sender];
 
         // Best-Effort: principal is ALWAYS returned first
         token.safeTransfer(msg.sender, dep.principal);
 
         // Best-Effort: interest paid from vault (partial if insufficient)
         uint256 actualPaid = 0;
-        if (interest > 0) {
-            actualPaid = vaultManager.requestInterest(msg.sender, interest);
+        if (totalOwed > 0) {
+            actualPaid = vaultManager.requestInterest(msg.sender, totalOwed);
 
-            // Emit PartialInterestPaid when vault could not cover full interest
-            if (actualPaid < interest) {
-                emit PartialInterestPaid(depositId, interest, actualPaid);
+            // Update debt tracking
+            if (actualPaid < totalOwed) {
+                userDebt[msg.sender] = totalOwed - actualPaid;
+                emit PartialInterestPaid(depositId, totalOwed, actualPaid);
+            } else {
+                userDebt[msg.sender] = 0;
             }
         }
 
@@ -469,8 +477,18 @@ contract SavingCore is ERC721, Ownable, Pausable {
         uint256 interest = (dep.principal * dep.aprBpsAtOpen * tenorSeconds)
             / (SECONDS_PER_YEAR * BPS_DENOMINATOR);
 
-        // ── New principal = old principal + interest
-        uint256 newPrincipal = dep.principal + interest;
+        // ── Request interest transfer from vault into this contract ──
+        uint256 actualPaid = 0;
+        if (interest > 0) {
+            actualPaid = vaultManager.requestInterest(address(this), interest);
+            if (actualPaid < interest) {
+                userDebt[msg.sender] += (interest - actualPaid);
+                emit PartialInterestPaid(depositId, interest, actualPaid);
+            }
+        }
+
+        // ── New principal = old principal + actualPaid (avoid undercollateralization)
+        uint256 newPrincipal = dep.principal + actualPaid;
 
         // ── Validate new principal against new plan limits
         if (newPlan.minDeposit > 0 && newPrincipal < newPlan.minDeposit) {
@@ -482,11 +500,6 @@ contract SavingCore is ERC721, Ownable, Pausable {
 
         // ── Close old deposit ─────────────────────
         dep.status = DepositStatus.ManualRenewed;
-
-        // ── Request interest transfer from vault into this contract ──
-        if (interest > 0) {
-            vaultManager.requestInterest(address(this), interest);
-        }
 
         // ── Mint new NFT ──────────────────────────
         newDepositId = nextDepositId++;
@@ -516,8 +529,8 @@ contract SavingCore is ERC721, Ownable, Pausable {
      * @notice Auto-renew a deposit after the grace period expires.
      * @dev Rules (updated per teacher requirements):
      *  - Same tenor as the original deposit.
-     *  - Fix APR: uses CURRENT plan APR & penalty (not original snapshot)
-     *    to reflect market changes.
+     *  - APR is locked to the original aprBpsAtOpen — not the current plan rate.
+     *    This protects the user if the admin has lowered the rate.
      *  - Max Deposit Guard: reverts if newPrincipal > plan.maxDeposit.
      *  - New principal = old principal + interest.
      *  - Can only be triggered after maturityAt + GRACE_PERIOD.
@@ -543,7 +556,17 @@ contract SavingCore is ERC721, Ownable, Pausable {
         uint256 interest = (dep.principal * dep.aprBpsAtOpen * tenorSeconds)
             / (SECONDS_PER_YEAR * BPS_DENOMINATOR);
 
-        uint256 newPrincipal = dep.principal + interest;
+        // ── Request interest from vault ───────────
+        uint256 actualPaid = 0;
+        if (interest > 0) {
+            actualPaid = vaultManager.requestInterest(address(this), interest);
+            if (actualPaid < interest) {
+                userDebt[depositOwner] += (interest - actualPaid);
+                emit PartialInterestPaid(depositId, interest, actualPaid);
+            }
+        }
+
+        uint256 newPrincipal = dep.principal + actualPaid;
 
         // Max Deposit Guard: prevent compounding past plan limit
         if (plan.maxDeposit > 0 && newPrincipal > plan.maxDeposit) {
@@ -553,30 +576,43 @@ contract SavingCore is ERC721, Ownable, Pausable {
         // ── Close old deposit ─────────────────────
         dep.status = DepositStatus.AutoRenewed;
 
-        // ── Request interest from vault ───────────
-        if (interest > 0) {
-            vaultManager.requestInterest(address(this), interest);
-        }
-
         // ── Mint new NFT to the original owner ────
         newDepositId = nextDepositId++;
         _mint(depositOwner, newDepositId);
 
         uint256 newMaturityAt = block.timestamp + dep.tenorDays * 1 days;
 
-        // Fix APR: snapshot CURRENT plan APR & penalty (not original)
+        // Protect User: snapshot ORIGINAL deposit APR & penalty
         deposits[newDepositId] = Deposit({
             planId: dep.planId,
             principal: newPrincipal,
             startAt: block.timestamp,
             maturityAt: newMaturityAt,
-            aprBpsAtOpen: plan.aprBps,                    // ← CURRENT plan APR
-            penaltyBpsAtOpen: plan.earlyWithdrawPenaltyBps, // ← CURRENT plan penalty
+            aprBpsAtOpen: dep.aprBpsAtOpen,               // ← locked to original APR
+            penaltyBpsAtOpen: dep.penaltyBpsAtOpen,       // ← locked to original penalty
             tenorDays: dep.tenorDays,                     // ← same tenor
             status: DepositStatus.Active
         });
 
         emit Renewed(depositId, newDepositId, newPrincipal, dep.planId);
+    }
+
+    // ══════════════════════════════════════════════
+    //  User — Claim Debt
+    // ══════════════════════════════════════════════
+
+    /**
+     * @notice Allows a user to manually claim unpaid interest (debt) without withdrawing a deposit.
+     */
+    function claimDebt() external whenNotPaused {
+        uint256 debt = userDebt[msg.sender];
+        if (debt == 0) revert("No debt to claim");
+
+        uint256 actualPaid = vaultManager.requestInterest(msg.sender, debt);
+        if (actualPaid > 0) {
+            userDebt[msg.sender] -= actualPaid;
+            emit PartialInterestPaid(0, debt, actualPaid); // 0 depositId indicates general debt claim
+        }
     }
 
     // ══════════════════════════════════════════════

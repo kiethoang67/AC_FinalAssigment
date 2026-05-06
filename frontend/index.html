@@ -148,13 +148,18 @@ hr{border:none;border-top:1px solid var(--border);margin:20px 0}
   <div class="stat"><div class="stat-val" id="vaultBal">—</div><div class="stat-lbl">Vault Balance</div></div>
   <div class="stat"><div class="stat-val" id="totalPlans">—</div><div class="stat-lbl">Savings Plans</div></div>
   <div class="stat"><div class="stat-val" id="myDeposits">—</div><div class="stat-lbl">My Deposits</div></div>
+  <div class="stat">
+    <div class="stat-val" id="myDebt" style="color:var(--red);display:flex;align-items:center;gap:8px">—
+    </div>
+    <div class="stat-lbl">Unpaid Debt <button id="claimDebtBtn" class="btn btn-primary btn-sm hidden" style="padding:2px 8px;font-size:11px" onclick="claimDebt()">Claim</button></div>
+  </div>
 </div>
 
 <!-- CONTRACT ADDRESSES -->
 <div class="contracts">
-  <div class="contract-item">💰 MockUSDC: <span>0x2279...eBe6</span><button class="copy-btn" onclick="copy('0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6')">Copy</button></div>
-  <div class="contract-item">🔐 VaultManager: <span>0x8A79...C318</span><button class="copy-btn" onclick="copy('0x8A791620dd6260079BF849Dc5567aDC3F2FdC318')">Copy</button></div>
-  <div class="contract-item">📄 SavingCore: <span>0x6101...AD788</span><button class="copy-btn" onclick="copy('0x610178dA211FEF7D417bC0e6FeD39F05609AD788')">Copy</button></div>
+  <div class="contract-item">💰 MockUSDC: <span>0xDc64...F6C9</span><button class="copy-btn" onclick="copy('0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9')">Copy</button></div>
+  <div class="contract-item">🔐 VaultManager: <span>0x5FC8...5707</span><button class="copy-btn" onclick="copy('0x5FC8d32690cc91D4c39d9d3abcBD16989F875707')">Copy</button></div>
+  <div class="contract-item">📄 SavingCore: <span>0x0165...Eb8F</span><button class="copy-btn" onclick="copy('0x0165878A594ca255338adfa4d48449f69242Eb8F')">Copy</button></div>
 </div>
 
 <!-- MAIN -->

@@ -48,7 +48,7 @@ async function main() {
   console.log("   ✅ setSavingCore() called successfully!\n");
 
   console.log("╔══════════════════════════════════════════════════════╗");
-  console.log("║               ✅ DEPLOY HOÀN TẤT!                    ║");
+  console.log("║               ✅ DEPLOY SUCCESSFUL!                  ║");
   console.log("╠══════════════════════════════════════════════════════╣");
   console.log(`║  MockUSDC     : ${mockUSDCAddress}  ║`);
   console.log(`║  VaultManager : ${vaultManagerAddress}  ║`);
@@ -79,11 +79,11 @@ async function main() {
   const addrJson = { usdc: mockUSDCAddress, vault: vaultManagerAddress, core: savingCoreAddress };
   fs.writeFileSync(path.join(__dirname, "../frontend/addresses.json"), JSON.stringify(addrJson, null, 2));
 
-  console.log("\n✅ Đã tự động cập nhật frontend/app.js!");
-  console.log("✅ Đã tạo frontend/addresses.json!\n");
+  console.log("\n✅ Automatically updated frontend/app.js!");
+  console.log("✅ Automatically generated frontend/addresses.json!\n");
 }
 
 main().catch((error) => {
-  console.error("❌ Deploy thất bại:", error);
+  console.error("❌ Deploy failed:", error);
   process.exitCode = 1;
 });

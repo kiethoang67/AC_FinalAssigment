@@ -1,8 +1,8 @@
 // ─── CONFIG ──────────────────────────────────────────────────
 const ADDRESSES = {
-  usdc:    "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
-  vault:   "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
-  core:    "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+  usdc:    "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+  vault:   "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+  core:    "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
 };
 
 const ABI_USDC = [
@@ -36,6 +36,8 @@ const ABI_CORE = [
   "function earlyWithdraw(uint256 depositId) external",
   "function renewDeposit(uint256 depositId,uint256 newPlanId) external returns (uint256)",
   "function autoRenewDeposit(uint256 depositId) external returns (uint256)",
+  "function userDebt(address user) external view returns (uint256)",
+  "function claimDebt() external",
 ];
 
 // ─── STATE ────────────────────────────────────────────────────
@@ -82,32 +84,40 @@ async function connectWithPK() {
 
 // ─── WALLET ───────────────────────────────────────────────────
 async function connectWallet() {
-  if (!window.ethereum) return toast("Please install MetaMask!", "error");
+  if (!window.ethereum) return toast("Please install MetaMask! (Make sure you are not opening the file directly via file://. Use a local server!)", "error");
   try {
     // Bước 1: Yêu cầu kết nối tài khoản
     await window.ethereum.request({ method: "eth_requestAccounts" });
 
-    // Bước 2: Kiểm tra và chuyển sang mạng Hardhat (chainId 31337)
+    // Bước 2: Ép buộc MetaMask chuyển sang mạng Localhost (chainId 31337 = 0x7a69)
     const chainId = await window.ethereum.request({ method: "eth_chainId" });
-    if (chainId !== "0x7a69") { // 0x7a69 = 31337
+    if (chainId !== "0x7a69") {
       try {
         await window.ethereum.request({
           method: "wallet_switchEthereumChain",
-          params: [{ chainId: "0x7a69" }],
+          params: [{ chainId: "0x7a69" }], // 0x7a69 = 31337 (Hardhat Localhost)
         });
       } catch (switchErr) {
-        // Nếu chưa có mạng, thêm mới
+        // Nếu người dùng chưa thêm mạng Localhost, yêu cầu thêm vào
         if (switchErr.code === 4902) {
-          await window.ethereum.request({
-            method: "wallet_addEthereumChain",
-            params: [{
-              chainId: "0x7a69",
-              chainName: "Hardhat Localhost",
-              rpcUrls: ["http://127.0.0.1:8545"],
-              nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
-            }],
-          });
-        } else throw switchErr;
+          try {
+            await window.ethereum.request({
+              method: "wallet_addEthereumChain",
+              params: [
+                {
+                  chainId: "0x7a69",
+                  chainName: "Hardhat Localhost",
+                  rpcUrls: ["http://127.0.0.1:8545"],
+                  nativeCurrency: { name: "GO", symbol: "GO", decimals: 18 },
+                },
+              ],
+            });
+          } catch (addError) {
+            return toast("Không thể tự động thêm mạng Localhost!", "error");
+          }
+        } else {
+          return toast("Vui lòng tự chuyển sang mạng Localhost trên MetaMask!", "error");
+        }
       }
     }
 
@@ -141,16 +151,29 @@ async function connectWallet() {
 // ─── STATS ────────────────────────────────────────────────────
 async function refreshStats() {
   try {
-    const [bal, vault, nextPlan, nextDep] = await Promise.all([
+    const [bal, vault, nextPlan, nextDep, debt] = await Promise.all([
       usdcContract.balanceOf(userAddr),
       vaultContract.vaultBalance(),
       coreContract.nextPlanId(),
       coreContract.nextDepositId(),
+      coreContract.userDebt(userAddr)
     ]);
     document.getElementById("myBalance").textContent = fmtUSDC(bal) + " USDC";
     document.getElementById("vaultBal").textContent  = fmtUSDC(vault) + " USDC";
     document.getElementById("totalPlans").textContent = Number(nextPlan) - 1;
     document.getElementById("myDeposits").textContent = "—";
+    
+    if (document.getElementById("myDebt")) {
+      document.getElementById("myDebt").innerHTML = `${fmtUSDC(debt)} USDC`;
+      const claimBtn = document.getElementById("claimDebtBtn");
+      if (claimBtn) {
+        if (debt > 0n && vault > 0n) {
+           claimBtn.classList.remove("hidden");
+        } else {
+           claimBtn.classList.add("hidden");
+        }
+      }
+    }
   } catch(e) { console.error(e); }
 }
 
@@ -324,12 +347,32 @@ async function openDeposit() {
 
 async function withdrawMature(id) {
   try {
+    const interest = await coreContract.calculateInterest(id);
+    const vaultBal = await vaultContract.vaultBalance();
+    const debt = await coreContract.userDebt(userAddr);
+    const totalOwed = interest + debt;
+    
+    if (totalOwed > 0 && vaultBal < totalOwed) {
+      const proceed = confirm("Vault is insufficient to pay full interest. Do you still want to withdraw? Unpaid interest will be saved as debt and paid next time.");
+      if (!proceed) return;
+    }
+
     toast("Withdrawing...");
     const tx = await coreContract.withdrawAtMaturity(id);
     await tx.wait();
     await refreshStats();
     await loadDeposits();
     toast("Withdrawal successful!", "success");
+  } catch(e) { toast(parseErr(e), "error"); }
+}
+
+async function claimDebt() {
+  try {
+    toast("Claiming debt...");
+    const tx = await coreContract.claimDebt();
+    await tx.wait();
+    await refreshStats();
+    toast("Debt claimed successfully!", "success");
   } catch(e) { toast(parseErr(e), "error"); }
 }
 

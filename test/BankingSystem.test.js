@@ -213,7 +213,7 @@ describe("BankingSystem", function () {
         .withArgs(expectedNewPrincipal, parseUSDC(1000));
     });
 
-    it("Should auto-renew and use the CURRENT plan APR (not the old snapshot)", async function () {
+    it("Should auto-renew and lock the APR to the original aprBpsAtOpen", async function () {
       const { token, savingCore, admin, user1, parseUSDC } = await loadFixture(deployBankingSystemFixture);
 
       const depositAmount = parseUSDC(1000);
@@ -222,8 +222,12 @@ describe("BankingSystem", function () {
       await token.connect(user1).approve(await savingCore.getAddress(), depositAmount);
       await savingCore.connect(user1).openDeposit(planId, depositAmount);
 
-      // TRƯỚC KHI gia hạn, Admin cập nhật lãi suất Gói 1 lên 10% (1000 bps)
-      await savingCore.connect(admin).updatePlan(planId, 1000);
+      // Lấy APR ban đầu của Gói 1 (800 bps)
+      const oldDeposit = await savingCore.getDeposit(1);
+      const originalApr = oldDeposit.aprBpsAtOpen;
+
+      // TRƯỚC KHI gia hạn, Admin HẠ lãi suất Gói 1 xuống 5% (500 bps)
+      await savingCore.connect(admin).updatePlan(planId, 500);
 
       // Giả lập thời gian trôi qua: 90 ngày (đáo hạn) + 3 ngày (ân hạn/Grace Period) + 1 giây
       await time.increase(93 * 24 * 60 * 60 + 1);
@@ -240,9 +244,9 @@ describe("BankingSystem", function () {
       const newDeposit = await savingCore.getDeposit(2);
       expect(newDeposit.principal).to.equal(expectedNewPrincipal);
       
-      // Khoản gửi mới phải cập nhật mức lãi suất HIỆN TẠI (1000 bps), 
-      // chứ không dùng mức lãi suất cũ (800 bps) lúc mở sổ nữa.
-      expect(newDeposit.aprBpsAtOpen).to.equal(1000);
+      // Khoản gửi mới phải khóa cứng mức lãi suất CŨ (800 bps), 
+      // bảo vệ user mặc dù admin đã hạ lãi suất xuống 500 bps.
+      expect(newDeposit.aprBpsAtOpen).to.equal(originalApr);
     });
   });
 
